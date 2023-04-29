@@ -2,7 +2,7 @@ import requests
 import urllib3
 import time
 import re
-# from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup
 
 urllib3.disable_warnings()
 hd = {
