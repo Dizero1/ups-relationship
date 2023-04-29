@@ -2,14 +2,14 @@ import requests
 import urllib3
 import time
 import re
-from bs4 import BeautifulSoup
+# from bs4 import BeautifulSoup
 
 urllib3.disable_warnings()
 hd = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36',
 }
 class video:
-    def __init__(self,bvid) -> None:
+    def __init__(self,bvid:str) -> None:
         self.stat = {
         'code': int,#0：成功 -400：请求错误 -403：权限不足 -404：无视频 62002：稿件不可见 62004：稿件审核中
         'title': str,
@@ -31,7 +31,7 @@ class video:
             ]    
         }
         self.stat.update(self.statget(bvid))
-    def statget(bvid):
+    def statget(self,bvid:str):
         url = f"https://api.bilibili.com/x/web-interface/view?bvid={bvid}"
         r = requests.get(url, headers=hd, verify=False)
         r.raise_for_status()
@@ -55,13 +55,15 @@ class video:
             }
             ]    
         }
-        stat['code'] = r.json()['code']
-        stat['up_uid'] = r.json()['data']['owner']['mid']
-        stat['up_name'] = r.json()['data']['owner']['name']
+        try:
+            stat['code'] = r.json()['code']
+            stat['up_uid'] = r.json()['data']['owner']['mid']
+            stat['up_name'] = r.json()['data']['owner']['name']
+        except KeyError:
+            pass
         for k,v in stat.items():
             for data in [r.json()['data'],r.json()['data']['stat']]:
                 try:
-                    # print(k,v)
                     stat[k] = data[k]
                 except KeyError:
                     pass
@@ -88,3 +90,6 @@ def get_tagid(bvid):
     r = requests.get(url, headers=hd, verify=False)
     r.raise_for_status()
     return [data['tag_id'] for data in r.json()['data']]
+
+xy1 =video('BV1xP411U79V')
+print(xy1.stat)
