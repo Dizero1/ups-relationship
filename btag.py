@@ -9,72 +9,51 @@ hd = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36',
 }
 
-class video:
+class Video:
     def __init__(self,bvid:str) -> None:
         self.stat = {
-        'code': int,#0：成功 -400：请求错误 -403：权限不足 -404：无视频 62002：稿件不可见 62004：稿件审核中
-        'title': str,
-        'up_uid': int,
-        'up_name':str,
-        'aid': int,
-        'bvid': str,
-        'view': int,
-        'danmaku': int,
-        'reply': int,
-        'favorite': int,
-        'coin': int,
-        'like': int,
+        'code': 0,#0：成功 -400：请求错误 -403：权限不足 -404：无视频 62002：稿件不可见 62004：稿件审核中
+        'title': '',
+        'up_uid': 0,
+        'up_name':'',
+        'pubdate':0,
+        'aid': 0,
+        'bvid': '',
+        'view': 0,
+        'danmaku': 0,
+        'reply': 0,
+        'favorite': 0,
+        'coin': 0,
+        'like': 0,
         'tag':[
             {
-            'tag_id':int,
-            'tag_name': str
+            'tag_id':0,
+            'tag_name': ''
             }
             ]    
         }
         self.stat.update(self.statget(bvid))
     def statget(self,bvid:str):
-        url = f"https://api.bilibili.com/x/web-interface/view?bvid={bvid}"
+        url = f"https://api.bilibili.com/x/web-interface/view/detail?bvid={bvid}"
         r = requests.get(url, headers=hd, verify=False)
         r.raise_for_status()
-        stat = {
-        'code': int,
-        'title': str,
-        'up_uid': int,
-        'up_name':str,
-        'aid': int,
-        'bvid': str,
-        'view': int,
-        'danmaku': int,
-        'reply': int,
-        'favorite': int,
-        'coin': int,
-        'like': int,
-        'tag':[
-            {
-            'tag_id':int,
-            'tag_name': str
-            }
-            ]    
-        }
+        stat = self.stat.copy()
         try:
             stat['code'] = r.json()['code']
-            stat['up_uid'] = r.json()['data']['owner']['mid']
-            stat['up_name'] = r.json()['data']['owner']['name']
+            stat['up_uid'] = r.json()['data']['Card']['card']['mid']
+            stat['up_name'] = r.json()['data']['Card']['card']['name']
         except KeyError:
             pass
         for k,v in stat.items():
-            for data in [r.json()['data'],r.json()['data']['stat']]:
+            for data in [r.json()['data']['View'],r.json()['data']['View']['stat']]:
                 try:
                     stat[k] = data[k]
                 except KeyError:
                     pass
                 else:
                     break
-        url = f"https://api.bilibili.com/x/tag/archive/tags?bvid={bvid}"
-        r = requests.get(url, headers=hd, verify=False)
-        r.raise_for_status()
-        stat['tag'] = [{'tag_id':data['tag_id'],'tag_name': data['tag_name']} for data in r.json()['data']]
-        time.sleep(0.1)            
+        stat['tag'] = [{'tag_id':data['tag_id'],'tag_name': data['tag_name']} for data in r.json()['data']['Tags']]
+        time.sleep(0.05)            
         return stat
         
     
