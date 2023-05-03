@@ -2,6 +2,7 @@ import requests
 import urllib3
 import time
 import re
+import copy
 from bs4 import BeautifulSoup
 
 urllib3.disable_warnings()
@@ -12,13 +13,13 @@ hd = {
 class Video:
     def __init__(self,bvid:str) -> None:
         self.stat = {
-        'code': 0,#0：成功 -400：请求错误 -403：权限不足 -404：无视频 62002：稿件不可见 62004：稿件审核中
-        'title': '',
+        'code': 1,#0：成功 -400：请求错误 -403：权限不足 -404：无视频 62002：稿件不可见 62004：稿件审核中
+        'title': '视频不存在或不可见',
         'up_uid': 0,
-        'up_name':'',
+        'up_name':'无',
         'pubdate':0,
         'aid': 0,
-        'bvid': '',
+        'bvid': 'BV',
         'view': 0,
         'danmaku': 0,
         'reply': 0,
@@ -26,18 +27,16 @@ class Video:
         'coin': 0,
         'like': 0,
         'tag':[
-            {
-            'tag_id':0,
-            'tag_name': ''
-            }
             ]    
         }
         self.stat.update(self.statget(bvid))
+    def __str__(self) -> str:
+        return self.stat['title']
     def statget(self,bvid:str):
         url = f"https://api.bilibili.com/x/web-interface/view/detail?bvid={bvid}"
         r = requests.get(url, headers=hd, verify=False)
         r.raise_for_status()
-        stat = self.stat.copy()
+        stat = copy.deepcopy(self.stat)
         try:
             stat['code'] = r.json()['code']
             stat['up_uid'] = r.json()['data']['Card']['card']['mid']
@@ -53,7 +52,7 @@ class Video:
                 else:
                     break
         stat['tag'] = [{'tag_id':data['tag_id'],'tag_name': data['tag_name']} for data in r.json()['data']['Tags']]
-        time.sleep(0.05)            
+        time.sleep(0.02)            
         return stat
         
     
