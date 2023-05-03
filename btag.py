@@ -4,6 +4,7 @@ import time
 import re
 import copy
 from bs4 import BeautifulSoup
+import pandas as pd
 
 urllib3.disable_warnings()
 hd = {
