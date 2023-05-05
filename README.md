@@ -14,6 +14,7 @@
 | aid     | int | 稿件avid     |       |
 | up_uid  | int | UP主uid      |       |
 | up_name | str | UP主昵称     |       |
+| pubdate | int | 视频发布时间  | 秒级时间戳 |
 | view    | int | 播放数       |       |
 | danmaku | int | 弹幕数       |       |
 | reply   | int | 评论数       |       |

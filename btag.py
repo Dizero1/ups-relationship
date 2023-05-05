@@ -12,7 +12,7 @@ hd = {
 }
 
 class Video:
-    def __init__(self,bvid:str) -> None:
+    def __init__(self, bvid:str, stat = None):
         self.stat = {
         'code': 1,#0：成功 -400：请求错误 -403：权限不足 -404：无视频 62002：稿件不可见 62004：稿件审核中
         'title': '视频不存在或不可见',
@@ -30,7 +30,10 @@ class Video:
         'tag':[
             ]    
         }
-        self.stat.update(self.statget(bvid))
+        if stat == None:
+            self.stat.update(self.statget(bvid))
+        else:
+            self.stat.update(stat)
     def __str__(self) -> str:
         return self.stat['title']
     def statget(self,bvid:str):
@@ -56,8 +59,6 @@ class Video:
         time.sleep(0.02)            
         return stat
         
-    
-bvid = 'BV1xP411U79V'#for test
 
 def get_tagid(bvid):
     url = f"https://api.bilibili.com/x/tag/archive/tags?bvid={bvid}"
