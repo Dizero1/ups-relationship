@@ -14,59 +14,105 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout">
-    <item row="1" column="2">
+   <layout class="QGridLayout" name="gridLayout" rowminimumheight="0,0,0,0,0,0,0,0,0,0,0,0,0">
+    <item row="1" column="5">
+     <widget class="QLabel" name="labell">
+      <property name="text">
+       <string>视频列表</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="3">
      <widget class="QLabel" name="label">
       <property name="text">
        <string>输入</string>
       </property>
      </widget>
     </item>
-    <item row="1" column="4">
-     <widget class="QLabel" name="label_2">
+    <item row="2" column="5" rowspan="2" colspan="3">
+     <widget class="QListView" name="listView"/>
+    </item>
+    <item row="4" column="6">
+     <widget class="QPushButton" name="pushButtonr">
       <property name="text">
-       <string>列表</string>
+       <string>读取json</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="3" colspan="2">
+     <widget class="QTextBrowser" name="textBrowser_2"/>
+    </item>
+    <item row="2" column="3" colspan="2">
+     <widget class="QPlainTextEdit" name="plainTextEdit">
+      <property name="plainText">
+       <string>少年Pi,api,A_Pi,少年PI,API</string>
       </property>
      </widget>
     </item>
     <item row="4" column="5">
-     <widget class="QPushButton" name="pushButton_show">
+     <widget class="QPushButton" name="pushButtons">
       <property name="text">
-       <string>数据表</string>
+       <string>保存json</string>
       </property>
      </widget>
     </item>
-    <item row="4" column="4">
-     <widget class="QPushButton" name="pushButton_2">
-      <property name="text">
-       <string>获取视频数据</string>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="4" colspan="2">
-     <widget class="QListView" name="listView"/>
-    </item>
-    <item row="0" column="0" rowspan="3" colspan="2">
+    <item row="0" column="0" rowspan="4" colspan="3">
      <widget class="QTextBrowser" name="textBrowser">
       <property name="html">
        <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'SimSun'; font-size:9.06294pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:9.06294pt;&quot;&gt;up名称及tag&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:14pt;&quot;&gt;说明：&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:9.06294pt;&quot;&gt;输入tag列表&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:9.06294pt;&quot;&gt;example:&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:9.06294pt; font-weight:600;&quot;&gt;'少年Pi','api','A_Pi','少年PI','API'&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:9.06294pt; font-weight:600;&quot;&gt;少年Pi,api,A_Pi,少年PI,API&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9.06294pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
      </widget>
     </item>
-    <item row="2" column="2">
-     <widget class="QTextEdit" name="textEdit"/>
+    <item row="4" column="1">
+     <widget class="QLineEdit" name="lineEdit"/>
     </item>
-    <item row="3" column="4">
-     <widget class="QPushButton" name="pushButton">
+    <item row="4" column="3">
+     <widget class="QPushButton" name="pushButtonl">
       <property name="text">
        <string>拉取视频列表</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="0">
+     <widget class="QLabel" name="label_4">
+      <property name="text">
+       <string>拉取量</string>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="6">
+     <widget class="QPushButton" name="pushButtonshow">
+      <property name="text">
+       <string>展示数据表</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="4">
+     <widget class="QPushButton" name="pushButtonv">
+      <property name="text">
+       <string>获取视频数据</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="4">
+     <widget class="QLabel" name="labelt">
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="3" colspan="2">
+     <widget class="QLabel" name="labeld">
+      <property name="text">
+       <string/>
       </property>
      </widget>
     </item>

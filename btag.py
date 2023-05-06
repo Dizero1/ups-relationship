@@ -13,15 +13,15 @@ hd = {
 
 vlist={}
 def singleton(cls):
-    def inner(bvid):
+    def inner(bvid, stat=None):
         if bvid not in vlist.keys():
-            vlist[bvid] = cls(bvid)
+            vlist[bvid] = cls(bvid,stat)
         return vlist[bvid]
     return inner
 
 @singleton
 class Video:
-    def __init__(self, bvid:str, stat = None):
+    def __init__(self, bvid:str, stat=None):
         self.stat = {
         'code': 1,#0：成功 -400：请求错误 -403：权限不足 -404：无视频 62002：稿件不可见 62004：稿件审核中
         'title': '视频不存在或不可见',
@@ -43,8 +43,10 @@ class Video:
             self.stat.update(self.statget(bvid))
         else:
             self.stat.update(stat)
-    def __str__(self) -> str:
+
+    def __repr__(self) -> str:
         return self.stat['title']
+    
     def statget(self,bvid:str):
         url = f"https://api.bilibili.com/x/web-interface/view/detail?bvid={bvid}"
         r = requests.get(url, headers=hd, verify=False)
@@ -69,13 +71,24 @@ class Video:
         return stat
         
 
-def get_tagid(bvid):
-    url = f"https://api.bilibili.com/x/tag/archive/tags?bvid={bvid}"
-    r = requests.get(url, headers=hd, verify=False)
-    r.raise_for_status()
-    return [data['tag_id'] for data in r.json()['data']]
+# def get_tagid(bvid):
+#     url = f"https://api.bilibili.com/x/tag/archive/tags?bvid={bvid}"
+#     r = requests.get(url, headers=hd, verify=False)
+#     r.raise_for_status()
+#     return [data['tag_id'] for data in r.json()['data']]
 
 def bvidlist_bytid(tid:int, pn=1):
     url = f"https://api.bilibili.com/x/tag/detail?pn={pn}&ps=40&tag_id={tid}"
     rt = requests.get(url, headers=hd, verify=False)
     return [ar['bvid'] for ar in rt.json()['data']['news']['archives']]
+
+def totagid(tag_name):
+    url = f"https://api.bilibili.com/x/tag/info?tag_name={tag_name}"
+    r = requests.get(url, headers=hd, verify=False)
+    return r.json()['data']['tag_id']
+
+def totagname(tag_id):
+    url = f"https://api.bilibili.com/x/tag/info?tag_id={tag_id}"
+    r = requests.get(url, headers=hd, verify=False)
+    return r.json()['data']['tag_name']
+    

@@ -4,7 +4,7 @@ import sys
 import os
 from PyQt5.uic import *
 from PyQt5.QtWidgets import *
-from PyQt5.QtCore import (QAbstractTableModel, Qt)
+from PyQt5.QtCore import QStringListModel,QAbstractTableModel, Qt
  
  
 class PdTable(QAbstractTableModel):
@@ -39,16 +39,18 @@ class firstWindow(QMainWindow):
     def __init__(self):
         super(firstWindow, self).__init__()
         self.ui = loadUi(r'test.ui', self)
-        self.ui.pushButton.clicked.connect(self.clickToPrint)
-        self.ui.pushButton_show.clicked.connect(self.clicktoshow)
+        self.ui.pushButtonl.clicked.connect(self.c_getlist)
+        self.ui.pushButtonshow.clicked.connect(self.c_showdata)
+        self.ui.pushButtonr.clicked.connect(self.c_readjs)
+        self.ui.pushButtons.clicked.connect(self.c_savejs)
+        self.ui.listView.clicked.connect(self.listchange)
+        self.tlist =[0]
+        self.tdict ={0:''}
+        self.listn =0
         # self._data = data
 
-    def clickToPrint(self):
-        info = self.ui.textEdit.toPlainText()
-        print('1')
-
-    def clicktoshow(self):
-        df = pd.DataFrame(self._data)
+    def c_showdata(self):
+        df = pd.DataFrame(self.data)
     
         model = PdTable(df)
         self.view = QTableView()
@@ -58,6 +60,57 @@ class firstWindow(QMainWindow):
         self.view.setAlternatingRowColors(True)
         self.view.show()
 
+    def c_readjs(self):
+        fjs =readjs(self.tlist[self.listn])
+        if fjs != '':
+            self.data = pd.read_json(fjs)
+            self.bset[self.tlist[self.listn]]=self.data['bvid'].tolist()
+            self.ui.labelr.setText('数据已读取')
+
+        else:
+            self.ui.pushButtonr.setText(f'未找到{self.tlist[self.listn]}的json')
+            QApplication.processEvents()
+            time.sleep(1)
+            self.ui.pushButtonr.setText('读取json')
+
+    def c_savejs(self):
+        if self.tlist[self.listn] != 0 and len(self.data) >0 :
+            self.data.to_json(fjs,'records',force_ascii=False)
+            os.rename(fjs, f'./data_test/{self.tlist[self.listn]}_{int(time.time())}.json')
+        else:
+            self.ui.pushButtons.setText('无数据')
+            QApplication.processEvents()
+            time.sleep(1)
+            self.ui.pushButtons.setText('保存json')
+
+
+    def c_getlist(self):
+        s_tlist = self.ui.plainTextEdit.toPlainText()
+        s_tlist = s_tlist.split(',')
+        self.tlist =[]
+        td = ''
+        for tn in s_tlist:
+            tid = totagid(tn)
+            self.tlist.append(tid)
+            self.tdict[tid] = tn
+            td += f'{tn}:{tid}\n'
+        self.bset = {}
+        for tid in self.tlist:
+            self.bset[tid] = readblist(tid)
+        self.ui.textBrowser_2.setPlainText(td)
+        self.listn = -1
+        self.listchange()
+
+    def listchange(self):
+        self.listn = self.listn + 1 if self.listn+1 < len(self.tlist) else 0
+        tid = self.tlist[self.listn]
+        self.ui.labelt.setText(f'当前tag {self.tdict[tid]} {tid}')
+        self.model = [QStringListModel(self.bset[tid]) for tid in self.tlist]
+        self.ui.listView.setModel(self.model[self.listn])
+
+    def c_getdata(self):
+        pass
+
 def readjs(tid, i = -1): 
     folder = "./data_test/"
     files = os.listdir(folder)
@@ -65,10 +118,17 @@ def readjs(tid, i = -1):
     def file_filter(f):
         return False if re.match(f'{tid}_.*\.json',f)==None else True
     files = list(filter(file_filter, files))
-    return folder+files[i] 
+    if files != []:
+        return folder+files[i] 
+    return ''
 
-tid = 2885698
-tname = '小由'
+def readblist(tid,n=5):
+    blist = set()
+    for i in range(1,n+1):
+        blist = blist or set(bvidlist_bytid(tid,i))
+        time.sleep(0.05)
+    return list(blist)
+
 
 # print(f'loading:videolist of \'{tname}\' tag(40 in 1 page)')
 # blist = []
@@ -81,17 +141,14 @@ tname = '小由'
 # input('continue:')
 # vlist = [Video(bvid) for bvid in blist]
 # print('loading completed')
-fjs =readjs(tid)
-data = pd.read_json(fjs)
+fjs = None
+# data = None
 # vlist = []
 # data = pd.DataFrame([v.stat for v in vlist])
-data.to_json(fjs,'records',force_ascii=False)
-os.rename(fjs, f'./data_test/{tid}_{int(time.time())}.json')
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     mainWindow = firstWindow()
-    mainWindow._data = data
     mainWindow.show()
     sys.exit(app.exec_())
     
