@@ -44,9 +44,10 @@ class firstWindow(QMainWindow):
         self.ui.pushButtonr.clicked.connect(self.c_readjs)
         self.ui.pushButtons.clicked.connect(self.c_savejs)
         self.ui.listView.clicked.connect(self.listchange)
-        self.tlist =[0]
-        self.tdict ={0:''}
-        self.listn =0
+        self.tlist = [0]
+        self.tdict = {0:''}
+        self.listn = 0
+        self.vset = {}
         # self._data = data
 
     def c_showdata(self):
@@ -66,7 +67,6 @@ class firstWindow(QMainWindow):
             self.data = pd.read_json(fjs)
             self.bset[self.tlist[self.listn]]=self.data['bvid'].tolist()
             self.ui.labelr.setText('数据已读取')
-
         else:
             self.ui.pushButtonr.setText(f'未找到{self.tlist[self.listn]}的json')
             QApplication.processEvents()
@@ -109,6 +109,15 @@ class firstWindow(QMainWindow):
         self.ui.listView.setModel(self.model[self.listn])
 
     def c_getdata(self):
+        tid = self.tlist[self.listn]
+        if tid in self.vset.keys():
+            self.data = pd.DataFrame([v.stat for v in self.vset[tid]])
+            self.ui.labelr.setText('数据已读取')
+        else:    
+            vlist = [Video(bvid) for bvid in self.bset[tid]]
+            self.vset[tid] = vlist
+            self.data = pd.DataFrame([v.stat for v in vlist])
+            self.ui.labelr.setText('数据已获取')
         pass
 
 def readjs(tid, i = -1): 
@@ -130,43 +139,9 @@ def readblist(tid,n=5):
     return list(blist)
 
 
-# print(f'loading:videolist of \'{tname}\' tag(40 in 1 page)')
-# blist = []
-# n = 5
-# for i in range(1,n+1):
-#     blist = blist + bvidlist_bytid(tid,i)
-# blist = list(set(blist))   
-# print(f'loading:video of the list')
-
-# input('continue:')
-# vlist = [Video(bvid) for bvid in blist]
-# print('loading completed')
-fjs = None
-# data = None
-# vlist = []
-# data = pd.DataFrame([v.stat for v in vlist])
-
 if __name__ == '__main__':
+    fjs = None
     app = QApplication(sys.argv)
     mainWindow = firstWindow()
     mainWindow.show()
     sys.exit(app.exec_())
-    
-
-# num = 1
-# num = int(input('which video:'))
-# while num > 0:
-#     key = input('which key:')
-#     if key == 'all':
-#         print(vlist[num-1].stat)
-#     else:
-#         try:
-#             print(vlist[num-1].stat[key])
-#         except:
-#             print(key, 'keyerror')
-#     try:
-#         num = int(input('which video:'))
-#     except:
-#         pass
-#     else:
-#         num=0
