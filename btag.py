@@ -46,7 +46,7 @@ class Video:
     def __repr__(self) -> str:
         return self.stat['title']
     
-    def statget(self,bvid:str):
+    def statget(self, bvid:str):
         url = f"https://api.bilibili.com/x/web-interface/view/detail?bvid={bvid}"
         r = requests.get(url, headers=hd, verify=False)
         r.raise_for_status()
@@ -69,12 +69,6 @@ class Video:
         time.sleep(0.02)            
         return stat
         
-
-# def get_tagid(bvid):
-#     url = f"https://api.bilibili.com/x/tag/archive/tags?bvid={bvid}"
-#     r = requests.get(url, headers=hd, verify=False)
-#     r.raise_for_status()
-#     return [data['tag_id'] for data in r.json()['data']]
 
 def bvidlist_bytid(tid:int, pn=1):
     url = f"https://api.bilibili.com/x/tag/detail?pn={pn}&ps=40&tag_id={tid}"

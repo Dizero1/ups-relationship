@@ -7,7 +7,7 @@ from PyQt5.uic import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import QStringListModel, QAbstractTableModel, Qt
  
- 
+    
 class PdTable(QAbstractTableModel):
     #copy
     def __init__(self, data):
