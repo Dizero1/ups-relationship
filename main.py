@@ -2,9 +2,10 @@ from btag import *
 import json
 import sys
 import os
+import threading
 from PyQt5.uic import *
 from PyQt5.QtWidgets import *
-from PyQt5.QtCore import QStringListModel,QAbstractTableModel, Qt
+from PyQt5.QtCore import QStringListModel, QAbstractTableModel, Qt
  
  
 class PdTable(QAbstractTableModel):
@@ -38,22 +39,30 @@ class PdTable(QAbstractTableModel):
 class firstWindow(QMainWindow):
     def __init__(self):
         super(firstWindow, self).__init__()
-        self.ui = loadUi(r'test.ui', self)
-        self.ui.pushButtonl.clicked.connect(self.c_getlist)
-        self.ui.pushButtonshow.clicked.connect(self.c_showdata)
-        self.ui.pushButtonr.clicked.connect(self.c_readjs)
-        self.ui.pushButtons.clicked.connect(self.c_savejs)
-        self.ui.listView.clicked.connect(self.listchange)
+        self.data = pd.DataFrame()
+        self.data_af = pd.DataFrame()
+        self.bset = {0:[]}
         self.tlist = [0]
         self.tdict = {0:''}
         self.listn = 0
         self.vset = {}
-        # self._data = data
 
-    def c_showdata(self):
-        df = pd.DataFrame(self.data)
-    
-        model = PdTable(df)
+        self.ui = loadUi(r'test.ui', self)
+        self.ui.pushButtonl.clicked.connect(self.c_getlist)
+        # self.dgt = DataGetThread(self)
+        # self.dgt.start()
+        self.ui.pushButtonv.clicked.connect(self.c_getdata)
+        self.ui.pushButtonshow.clicked.connect(lambda:self.c_showdata(self.data))
+        self.ui.pushButtonf.clicked.connect(self.c_tagf)
+        self.ui.pushButtonsort.clicked.connect(self.c_sortv)
+        self.ui.pushButtonshow2.clicked.connect(lambda:self.c_showdata(self.data_af))
+        self.ui.pushButtonr.clicked.connect(self.c_readjs)
+        self.ui.pushButtons.clicked.connect(self.c_savejs)
+        self.ui.listView.clicked.connect(self.listchange)
+        self.ui.lineEditt.editingFinished.connect(self.tlistenter)
+        
+    def c_showdata(self,data):
+        model = PdTable(data)
         self.view = QTableView()
         self.view.setModel(model)
         self.view.setWindowTitle('数据表')
@@ -62,33 +71,55 @@ class firstWindow(QMainWindow):
         self.view.show()
 
     def c_readjs(self):
-        fjs =readjs(self.tlist[self.listn])
+        tid =self.tlist[self.listn]
+        fjs =readjs(tid)
         if fjs != '':
             self.data = pd.read_json(fjs)
-            self.bset[self.tlist[self.listn]]=self.data['bvid'].tolist()
-            self.ui.labelr.setText('数据已读取')
+            self.bset[tid] = self.data['bvid'].tolist()
+            self.vset[tid] = [Video(self.data.loc[i,'bvid'],self.data.loc[i].to_dict()) for i in range(len(self.data))]
+            self.ui.labeld.setText('数据已读取')
         else:
-            self.ui.pushButtonr.setText(f'未找到{self.tlist[self.listn]}的json')
+            self.ui.pushButtonr.setText(f'未找到{tid}的json')
             QApplication.processEvents()
             time.sleep(1)
             self.ui.pushButtonr.setText('读取json')
 
     def c_savejs(self):
         if self.tlist[self.listn] != 0 and len(self.data) >0 :
-            self.data.to_json(fjs,'records',force_ascii=False)
-            os.rename(fjs, f'./data_test/{self.tlist[self.listn]}_{int(time.time())}.json')
+            fjs = readjs(self.tlist[self.listn])
+            if fjs == '':
+                self.data.to_json(f'./data_test/{self.tlist[self.listn]}_{int(time.time())}.json','records',force_ascii=False)
+            else:
+                self.data.to_json(fjs,'records',force_ascii=False)
+                os.rename(fjs, f'./data_test/{self.tlist[self.listn]}_{int(time.time())}.json')
+            self.ui.labeld.setText('数据已保存')
         else:
             self.ui.pushButtons.setText('无数据')
             QApplication.processEvents()
             time.sleep(1)
             self.ui.pushButtons.setText('保存json')
 
-
-    def c_getlist(self):
-        s_tlist = self.ui.plainTextEdit.toPlainText()
+    def tlistenter(self):
+        s_tlist = self.ui.lineEditt.text()
         s_tlist = s_tlist.split(',')
         self.tlist =[]
         td = ''
+        n = 5
+        for tn in s_tlist:
+            tid = totagid(tn)
+            self.tlist.append(tid)
+            self.tdict[tid] = tn
+            td += f'{tn}:{tid}\n'
+        self.ui.textBrowser_2.setPlainText(td)
+
+    def c_getlist(self):
+        s_tlist = self.ui.lineEditt.text()
+        s_tlist = s_tlist.split(',')
+        self.tlist =[]
+        td = ''
+        self.ui.textBrowser_2.setPlainText('拉取中')
+        QApplication.processEvents()
+        n = 5
         for tn in s_tlist:
             tid = totagid(tn)
             self.tlist.append(tid)
@@ -96,7 +127,7 @@ class firstWindow(QMainWindow):
             td += f'{tn}:{tid}\n'
         self.bset = {}
         for tid in self.tlist:
-            self.bset[tid] = readblist(tid)
+            self.bset[tid] = readblist(tid,n)
         self.ui.textBrowser_2.setPlainText(td)
         self.listn = -1
         self.listchange()
@@ -110,15 +141,47 @@ class firstWindow(QMainWindow):
 
     def c_getdata(self):
         tid = self.tlist[self.listn]
+        if tid == 0: return
+        self.ui.labeld.setText('数据读取中')
+        QApplication.processEvents()
         if tid in self.vset.keys():
             self.data = pd.DataFrame([v.stat for v in self.vset[tid]])
-            self.ui.labelr.setText('数据已读取')
-        else:    
-            vlist = [Video(bvid) for bvid in self.bset[tid]]
+            self.ui.labeld.setText('数据已读取')
+        else:
+            i = 1
+            vlist = []
+            t = len(self.bset[tid])
+            for bvid in self.bset[tid]:
+                vlist.append(Video(bvid))
+                self.ui.labeld.setText(f'数据读取中{i}/{t}')
+                QApplication.processEvents()
+                i+=1
             self.vset[tid] = vlist
             self.data = pd.DataFrame([v.stat for v in vlist])
-            self.ui.labelr.setText('数据已获取')
-        pass
+            self.ui.labeld.setText('数据已获取')
+        return
+
+    def c_tagf(self):
+        s_tlist = self.ui.plainTextEdit1.toPlainText()
+        s_tlist = s_tlist.split(',')
+        tlist1 = [totagid(tn) for tn in s_tlist]
+        s_tlist = self.ui.plainTextEdit2.toPlainText()
+        s_tlist = s_tlist.split(',')
+        tlist2 = [totagid(tn) for tn in s_tlist]
+        vlist_af = [Video(k) for k in v_in.keys() if tagcon(k,tlist1,tlist2)]
+        self.data_af = pd.DataFrame([v.stat for v in vlist_af])
+        self.ui.labelf.setText(f'筛选完成，共{len(vlist_af)}条')
+
+    def c_sortv(self):
+        self.data_af = self.data_af.sort_values('view',ascending=False)
+
+# class DataGetThread(threading.Thread):
+#     def __init__(self,fw):
+#         threading.Thread.__init__(self)
+#         self.fw = fw
+#     def run(self): 
+#         self.fw.c_getdata()
+#         print('end')
 
 def readjs(tid, i = -1): 
     folder = "./data_test/"
@@ -131,17 +194,12 @@ def readjs(tid, i = -1):
         return folder+files[i] 
     return ''
 
-def readblist(tid,n=5):
-    blist = set()
-    for i in range(1,n+1):
-        blist = blist or set(bvidlist_bytid(tid,i))
-        time.sleep(0.05)
-    return list(blist)
 
 
 if __name__ == '__main__':
     fjs = None
     app = QApplication(sys.argv)
     mainWindow = firstWindow()
+    mainWindow.setWindowTitle('B站Tag视频搜索')
     mainWindow.show()
     sys.exit(app.exec_())

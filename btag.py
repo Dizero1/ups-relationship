@@ -11,12 +11,12 @@ hd = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36',
 }
 
-vlist={}
+v_in={}
 def singleton(cls):
     def inner(bvid, stat=None):
-        if bvid not in vlist.keys():
-            vlist[bvid] = cls(bvid,stat)
-        return vlist[bvid]
+        if bvid not in v_in.keys():
+            v_in[bvid] = cls(bvid,stat)
+        return v_in[bvid]
     return inner
 
 @singleton
@@ -82,6 +82,13 @@ def bvidlist_bytid(tid:int, pn=1):
     rt = requests.get(url, headers=hd, verify=False)
     return [ar['bvid'] for ar in rt.json()['data']['news']['archives']]
 
+def readblist(tid,n=5):
+    blist = set()
+    for i in range(1,n+1):
+        blist = blist | set(bvidlist_bytid(tid,i))
+        time.sleep(0.05)
+    return list(blist)
+
 def totagid(tag_name):
     url = f"https://api.bilibili.com/x/tag/info?tag_name={tag_name}"
     r = requests.get(url, headers=hd, verify=False)
@@ -91,4 +98,14 @@ def totagname(tag_id):
     url = f"https://api.bilibili.com/x/tag/info?tag_id={tag_id}"
     r = requests.get(url, headers=hd, verify=False)
     return r.json()['data']['tag_name']
+
+def tagcon(bvid,a:list,b:list):
+    bB = False
+    aB = False
+    for t in Video(bvid).stat['tag']:
+        for at in a:
+            aB = aB or at == t['tag_id']
+        for bt in b:
+            bB = bB or bt == t['tag_id']
+    return aB and bB
     
