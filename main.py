@@ -194,8 +194,6 @@ def readjs(tid, i = -1):
         return folder+files[i] 
     return ''
 
-
-
 if __name__ == '__main__':
     fjs = None
     app = QApplication(sys.argv)
